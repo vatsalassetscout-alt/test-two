@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>RankPulse Live · SERP Tracker (UberSuggest + Semrush Style)</title>
+    <title>RankPulse Live · SERP Keyword Tracker (SerpAPI)</title>
     <!-- Google Fonts + Font Awesome Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -21,7 +21,6 @@
             padding: 28px 24px 48px 24px;
         }
 
-        /* main container */
         .app-container {
             max-width: 1400px;
             margin: 0 auto;
@@ -64,11 +63,8 @@
             gap: 10px;
             color: #1e3a8a;
         }
-        .api-badge i {
-            font-size: 1rem;
-        }
 
-        /* card grid layout */
+        /* card grid */
         .tracker-panel {
             display: grid;
             grid-template-columns: 1fr 2.2fr;
@@ -80,18 +76,14 @@
                 grid-template-columns: 1fr;
                 gap: 24px;
             }
-            body {
-                padding: 16px;
-            }
+            body { padding: 16px; }
         }
 
-        /* add domain & keyword card */
         .add-card {
             background: white;
             border-radius: 28px;
             padding: 24px;
             box-shadow: 0 12px 28px rgba(0, 0, 0, 0.05);
-            transition: all 0.2s;
             border: 1px solid #eef2f8;
         }
         .section-title {
@@ -150,10 +142,7 @@
             justify-content: center;
             gap: 10px;
         }
-        .btn-primary:hover {
-            background: #111c3a;
-            transform: translateY(-2px);
-        }
+        .btn-primary:hover { background: #111c3a; transform: translateY(-2px); }
         .btn-secondary {
             background: #eff3f8;
             border: 1px solid #cfdfed;
@@ -162,19 +151,7 @@
             border-radius: 30px;
             font-weight: 500;
             cursor: pointer;
-            transition: 0.2s;
         }
-        .keyword-badge {
-            background: #f1f5f9;
-            border-radius: 40px;
-            padding: 6px 12px;
-            font-size: 0.75rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        /* rank table */
         .results-card {
             background: white;
             border-radius: 28px;
@@ -193,9 +170,7 @@
             flex-wrap: wrap;
             gap: 12px;
         }
-        .rank-table {
-            overflow-x: auto;
-        }
+        .rank-table { overflow-x: auto; }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -214,10 +189,7 @@
             border-bottom: 1px solid #f0f2f6;
             vertical-align: middle;
         }
-        .rank-position {
-            font-weight: 800;
-            font-size: 1rem;
-        }
+        .rank-position { font-weight: 800; font-size: 1rem; }
         .rank-top3 {
             background: #d9f0e1;
             color: #0b4f2c;
@@ -233,31 +205,16 @@
             padding: 4px 10px;
             font-weight: 600;
         }
-        .domain-cell {
-            font-family: monospace;
-            font-weight: 500;
-            word-break: break-all;
-        }
         .delete-btn {
             background: none;
             border: none;
             color: #9aaebf;
             cursor: pointer;
             font-size: 1.1rem;
-            transition: 0.2s;
         }
-        .delete-btn:hover {
-            color: #e53e3e;
-        }
-        .empty-state {
-            text-align: center;
-            padding: 48px 20px;
-            color: #7e8da0;
-        }
-        .refresh-icon {
-            cursor: pointer;
-            transition: 0.2s;
-        }
+        .delete-btn:hover { color: #e53e3e; }
+        .empty-state { text-align: center; padding: 48px 20px; color: #7e8da0; }
+        .refresh-icon { cursor: pointer; transition: 0.2s; margin-left: 8px; }
         .toast-msg {
             position: fixed;
             bottom: 24px;
@@ -272,61 +229,67 @@
             transition: 0.2s;
             pointer-events: none;
         }
-        .loading-overlay {
+        .loading-spinner-small {
             display: inline-block;
-            width: 18px;
-            height: 18px;
+            width: 14px;
+            height: 14px;
             border: 2px solid rgba(255,255,255,0.3);
             border-radius: 50%;
             border-top-color: white;
-            animation: spin 0.7s linear infinite;
+            animation: spin 0.6s linear infinite;
+            margin-right: 6px;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-        button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
+        button:disabled { opacity: 0.6; cursor: not-allowed; }
         .serp-note {
             font-size: 0.7rem;
             color: #6d7f96;
-            margin-top: 10px;
+            margin-top: 12px;
             text-align: center;
+        }
+        .api-input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        #serpApiKeyInput {
+            flex: 1;
+            border-radius: 40px;
+            border: 1px solid #ccc;
+            padding: 8px 16px;
+            font-size: 0.8rem;
+            font-family: monospace;
         }
     </style>
 </head>
 <body>
-
 <div class="app-container">
-    <!-- Header -->
     <div class="brand-header">
         <div class="logo-area">
             <h1><i class="fas fa-chart-line" style="color:#2c5f8a;"></i> RankPulse Live</h1>
-            <p>UberSuggest + Semrush style · Real SERP tracking via SerpAPI</p>
+            <p>UberSuggest + Semrush style · Real SERP tracking · SerpAPI</p>
         </div>
         <div class="api-badge">
-            <i class="fas fa-key"></i> <span id="apiKeyStatus">SerpAPI Ready</span>
+            <i class="fas fa-key"></i> <span id="apiKeyStatus">⚙️ API Key required</span>
             <i class="fas fa-sync-alt refresh-icon" id="refreshAllBtn" style="margin-left:8px;"></i>
         </div>
     </div>
 
     <div class="tracker-panel">
-        <!-- LEFT: Add domain + keyword block -->
+        <!-- LEFT: Add domain+keyword -->
         <div class="add-card">
-            <div class="section-title">
-                <i class="fas fa-plus-circle" style="color:#2c5f8a;"></i> Add Target
-            </div>
-            <div class="section-sub">Track keyword ranking for your domain (organic position)</div>
-            
+            <div class="section-title"><i class="fas fa-plus-circle" style="color:#2c5f8a;"></i> Add Target</div>
+            <div class="section-sub">Track keyword ranking for your domain (organic Google position)</div>
             <div class="input-group">
-                <label><i class="fas fa-globe"></i> Domain (root domain or subdomain)</label>
-                <input type="text" id="domainInput" placeholder="example.com, sub.example.com" value="wikipedia.org">
+                <label><i class="fas fa-globe"></i> Domain (root domain)</label>
+                <input type="text" id="domainInput" placeholder="example.com" value="wikipedia.org">
             </div>
             <div class="input-group">
                 <label><i class="fas fa-keyboard"></i> Keyword phrase</label>
-                <input type="text" id="keywordInput" placeholder="e.g., best seo tools" value="machine learning">
+                <input type="text" id="keywordInput" placeholder="e.g., seo tools" value="machine learning">
             </div>
             <div class="input-group">
-                <label><i class="fas fa-search-location"></i> Country / Region (Google domain)</label>
+                <label><i class="fas fa-search-location"></i> Country (Google domain)</label>
                 <select id="countrySelect">
                     <option value="us">🇺🇸 United States (google.com)</option>
                     <option value="gb">🇬🇧 United Kingdom (google.co.uk)</option>
@@ -338,28 +301,22 @@
                 </select>
             </div>
             <button id="addTrackBtn" class="btn-primary"><i class="fas fa-chart-simple"></i> Track Keyword & Domain</button>
-            <div class="serp-note">
-                <i class="fas fa-info-circle"></i> Uses your SerpAPI key (set below). Accurate live ranking from Google SERP.
-            </div>
+            <div class="serp-note"><i class="fas fa-info-circle"></i> Uses live SerpAPI. Enter your API key below.</div>
         </div>
 
-        <!-- RIGHT: Keyword ranking table -->
+        <!-- RIGHT: Rankings table -->
         <div class="results-card">
             <div class="card-header">
-                <span><i class="fas fa-trophy"></i> <strong>Live Rank Tracker</strong> (organic position)</span>
-                <div style="display: flex; gap: 12px;">
-                    <input type="password" id="serpApiKeyInput" placeholder="Enter SerpAPI Key" style="border-radius: 40px; border:1px solid #ccc; padding:6px 14px; font-size:0.75rem; width:200px;">
-                    <button id="saveApiKeyBtn" class="btn-secondary" style="padding:6px 14px;"><i class="fas fa-save"></i> Save</button>
+                <span><i class="fas fa-trophy"></i> <strong>Live SERP Ranking</strong> (organic position)</span>
+                <div class="api-input-group">
+                    <input type="password" id="serpApiKeyInput" placeholder="Your SerpAPI key" autocomplete="off">
+                    <button id="saveApiKeyBtn" class="btn-secondary"><i class="fas fa-save"></i> Save</button>
                 </div>
             </div>
             <div class="rank-table">
                 <table id="rankTable">
-                    <thead>
-                        <tr><th>Keyword</th><th>Target Domain</th><th>Country</th><th>Live SERP Position</th><th>Last Check</th><th style="width:40px"></th></tr>
-                    </thead>
-                    <tbody id="rankTableBody">
-                        <tr class="empty-state-row"><td colspan="6" class="empty-state">No keywords tracked. Add domain + keyword to start live ranking.</td></tr>
-                    </tbody>
+                    <thead><tr><th>Keyword</th><th>Target Domain</th><th>Country</th><th>Live Position</th><th>Last Check</th><th style="width:40px"></th></tr></thead>
+                    <tbody id="rankTableBody"><tr><td colspan="6" class="empty-state">✨ No keywords tracked. Add domain + keyword to start.</td></tr></tbody>
                 </table>
             </div>
         </div>
@@ -368,11 +325,11 @@
 <div id="toastMsg" class="toast-msg"></div>
 
 <script>
-    // ---------- APP STATE ----------
-    let trackedItems = [];     // each item: { id, domain, keyword, country, lastRank, lastChecked }
+    // ---------- STATE ----------
+    let trackedItems = [];      // { id, domain, keyword, country, lastRank, lastChecked }
     let serpApiKey = localStorage.getItem('serp_api_key') || '';
 
-    // DOM Elements
+    // DOM elements
     const domainInput = document.getElementById('domainInput');
     const keywordInput = document.getElementById('keywordInput');
     const countrySelect = document.getElementById('countrySelect');
@@ -382,39 +339,46 @@
     const saveApiBtn = document.getElementById('saveApiKeyBtn');
     const refreshAllBtn = document.getElementById('refreshAllBtn');
     const toast = document.getElementById('toastMsg');
+    const apiKeyStatusSpan = document.getElementById('apiKeyStatus');
 
-    // Helper: Show toast
+    // Helper: toast message
     function showMessage(text, isError = false) {
         toast.innerText = text;
         toast.style.backgroundColor = isError ? '#b91c1c' : '#1e293b';
         toast.style.opacity = '1';
-        setTimeout(() => {
-            toast.style.opacity = '0';
-        }, 2800);
+        setTimeout(() => { toast.style.opacity = '0'; }, 2800);
     }
 
-    // Load data from localStorage
+    // update api status badge
+    function updateApiStatusBadge() {
+        if(serpApiKey && serpApiKey.trim().length > 10) {
+            apiKeyStatusSpan.innerHTML = '<i class="fas fa-check-circle"></i> SerpAPI Active';
+            apiKeyStatusSpan.style.color = '#0f5c2f';
+        } else {
+            apiKeyStatusSpan.innerHTML = '<i class="fas fa-exclamation-triangle"></i> API Key missing';
+            apiKeyStatusSpan.style.color = '#b91c1c';
+        }
+    }
+
+    // load from localStorage
     function loadFromStorage() {
         const stored = localStorage.getItem('rankpulse_tracked');
         if(stored) {
-            try {
-                trackedItems = JSON.parse(stored);
-            } catch(e) { trackedItems = []; }
+            try { trackedItems = JSON.parse(stored); } catch(e) { trackedItems = []; }
         }
         if(apiKeyInput) apiKeyInput.value = serpApiKey;
+        updateApiStatusBadge();
         renderTable();
     }
 
-    // Save tracked items to localStorage
     function persistItems() {
         localStorage.setItem('rankpulse_tracked', JSON.stringify(trackedItems));
     }
 
-    // Render table UI (without fetching)
     function renderTable() {
         if(!tableBody) return;
         if(trackedItems.length === 0) {
-            tableBody.innerHTML = `<tr class="empty-state-row"><td colspan="6" class="empty-state">✨ No keywords tracked. Add domain + keyword to start live ranking.</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="6" class="empty-state">📭 No keywords tracked. Add domain + keyword to start live ranking.</td></tr>`;
             return;
         }
         let html = '';
@@ -428,16 +392,15 @@
                     <td>${getCountryFlag(item.country)} ${item.country.toUpperCase()}</td>
                     <td>${rankDisplay}</td>
                     <td style="font-size:0.75rem;">${checkedDate}</td>
-                    <td><button class="delete-btn" data-id="${item.id}" title="Remove keyword"><i class="fas fa-trash-alt"></i></button></td>
+                    <td><button class="delete-btn" data-id="${item.id}" title="Remove"><i class="fas fa-trash-alt"></i></button></td>
                 </tr>
             `;
         });
         tableBody.innerHTML = html;
-        // attach delete events
         document.querySelectorAll('.delete-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const id = parseInt(btn.getAttribute('data-id'));
-                deleteTrackedItem(id);
+                deleteItem(id);
             });
         });
     }
@@ -447,16 +410,15 @@
         if(rank === -1) return '<span class="rank-out"><i class="fas fa-ban"></i> Not in top 100</span>';
         if(rank <= 3) return `<span class="rank-top3"><i class="fas fa-crown"></i> #${rank}</span>`;
         if(rank <= 10) return `<span class="rank-position" style="color:#2b6e3c;">#${rank}</span>`;
-        if(rank <= 50) return `<span class="rank-position">#${rank}</span>`;
         return `<span class="rank-position">#${rank}</span>`;
     }
 
     function getCountryFlag(code) {
-        const flags = { us:'🇺🇸', gb:'🇬🇧', in:'🇮🇳', ca:'🇨🇦', au:'🇦🇺', de:'🇩🇪', fr:'🇫🇷' };
-        return flags[code] || '🌐';
+        const map = { us:'🇺🇸', gb:'🇬🇧', in:'🇮🇳', ca:'🇨🇦', au:'🇦🇺', de:'🇩🇪', fr:'🇫🇷' };
+        return map[code] || '🌐';
     }
 
-    function escapeHtml(str) { 
+    function escapeHtml(str) {
         if(!str) return '';
         return str.replace(/[&<>]/g, function(m) {
             if(m === '&') return '&amp;';
@@ -466,25 +428,25 @@
         });
     }
 
-    // Delete item
-    function deleteTrackedItem(id) {
+    function deleteItem(id) {
         trackedItems = trackedItems.filter(i => i.id !== id);
         persistItems();
         renderTable();
-        showMessage('Removed from tracking list', false);
+        showMessage('Removed from tracker', false);
     }
 
-    // Core SERP API call: fetch Google organic results and find position of domain
-    async function fetchRankForItem(item) {
+    // ----- CORE SERP API CALL (using SerpAPI node-like fetch) -----
+    async function fetchRankForKeyword(item) {
         if(!serpApiKey || serpApiKey.trim() === '') {
-            showMessage('⚠️ SerpAPI Key missing. Please enter and save your API key first.', true);
+            showMessage('❌ SerpAPI key missing. Please save your API key first.', true);
             return null;
         }
+        // Build params exactly as official docs: q, gl, hl, num=100
         const params = new URLSearchParams({
             api_key: serpApiKey,
+            engine: 'google',
             q: item.keyword,
-            location: item.country === 'us' ? 'United States' : (item.country === 'gb' ? 'United Kingdom' : (item.country === 'in' ? 'India' : (item.country === 'ca' ? 'Canada' : (item.country === 'au' ? 'Australia' : (item.country === 'de' ? 'Germany' : 'France')))),
-            gl: item.country,
+            gl: item.country,      // country code
             hl: 'en',
             num: 100
         });
@@ -492,59 +454,58 @@
         try {
             const response = await fetch(url);
             if(!response.ok) {
-                const errText = await response.text();
-                throw new Error(`SerpAPI error ${response.status}: ${errText.substring(0,100)}`);
+                const errorText = await response.text();
+                throw new Error(`SerpAPI error ${response.status}: ${errorText.substring(0, 120)}`);
             }
             const data = await response.json();
-            const organicResults = data.organic_results || [];
+            const organic = data.organic_results || [];
             let position = -1; // -1 means not found in top 100
-            // Normalize domain: remove protocol, www, trailing slash
+            // Normalize target domain (remove protocol, www, trailing slash)
             let targetDomainRaw = item.domain.toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0];
-            for(let idx=0; idx<organicResults.length; idx++) {
-                let result = organicResults[idx];
+            for(let i = 0; i < organic.length; i++) {
+                const result = organic[i];
                 let linkDomain = '';
                 if(result.link) {
-                    let hostname = result.link.toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0];
-                    linkDomain = hostname;
+                    linkDomain = result.link.toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0];
                 }
-                if(linkDomain === targetDomainRaw || linkDomain.endsWith('.'+targetDomainRaw) || targetDomainRaw.endsWith('.'+linkDomain)) {
-                    // exact match or subdomain consideration: but primary match main domain
-                    if(linkDomain === targetDomainRaw || linkDomain === `www.${targetDomainRaw}`) {
-                        position = idx+1;
-                        break;
-                    }
-                    // also if domain is subdomain like sub.example.com and target is example.com? we want exactly? but we match clean
-                    if(targetDomainRaw === linkDomain) { position = idx+1; break; }
+                // exact match of domain (or subdomain match if same base)
+                if(linkDomain === targetDomainRaw) {
+                    position = i+1;
+                    break;
                 }
-                // Additional: if domain appears in result domain after cleaning
-                if(linkDomain.includes(targetDomainRaw) && targetDomainRaw.split('.').length > 1) {
-                    if(targetDomainRaw === linkDomain) { position = idx+1; break; }
+                // Sometimes domain appears with trailing slash? already cleaned.
+                if(linkDomain === targetDomainRaw + '/') {
+                    position = i+1; break;
+                }
+                // additional: if target domain is e.g. wikipedia.org and link is en.wikipedia.org -> treat as match? optional but for accurate we check:
+                if(linkDomain.endsWith('.' + targetDomainRaw) && targetDomainRaw.split('.').length >= 2) {
+                    // subdomain like en.wikipedia.org vs wikipedia.org
+                    position = i+1;
+                    break;
                 }
             }
-            // if no match
-            if(position === -1) position = -1;  // not found top100
             return { rank: position, checkedAt: Date.now() };
         } catch(err) {
-            console.error('Rank fetch error', err);
-            showMessage(`Rank fetch failed for "${item.keyword}": ${err.message}`, true);
+            console.error('SerpAPI fetch error', err);
+            showMessage(`⚠️ Rank fetch failed for "${item.keyword}": ${err.message}`, true);
             return null;
         }
     }
 
-    // Update single item rank live (call API)
-    async function updateSingleItemRank(item, showToastResult = false) {
+    // update single item live
+    async function updateSingleRank(item, showToastResult = false) {
         if(!serpApiKey) {
             if(showToastResult) showMessage('Please set SerpAPI key first', true);
             return false;
         }
-        const result = await fetchRankForItem(item);
+        const result = await fetchRankForKeyword(item);
         if(result !== null) {
             item.lastRank = result.rank;
             item.lastChecked = result.checkedAt;
             persistItems();
-            renderTable();  // refresh UI
+            renderTable();
             if(showToastResult) {
-                const rankMsg = (result.rank === -1) ? 'not in top 100' : `#${result.rank}`;
+                const rankMsg = (result.rank === -1) ? 'not found in top 100' : `#${result.rank}`;
                 showMessage(`✅ "${item.keyword}" on ${item.domain} → ${rankMsg}`, false);
             }
             return true;
@@ -552,53 +513,39 @@
         return false;
     }
 
-    // Refresh all items (bulk, sequential to avoid rate limit)
+    // refresh all items sequentially (avoid rate limit)
     async function refreshAllItems() {
         if(trackedItems.length === 0) {
-            showMessage('No tracked keywords to refresh', false);
+            showMessage('No keywords to refresh', false);
             return;
         }
-        if(!serpApiKey) {
-            showMessage('Enter SerpAPI key before refreshing rankings', true);
+        if(!serpApiKey || serpApiKey.trim() === '') {
+            showMessage('🔑 Please enter and save your SerpAPI key first', true);
             return;
         }
-        showMessage(`🔄 Refreshing ${trackedItems.length} keyword(s) live... this may take a moment`, false);
+        showMessage(`🔄 Refreshing ${trackedItems.length} keyword(s) live... (each request may take a moment)`, false);
         for(let i=0; i<trackedItems.length; i++) {
             const item = trackedItems[i];
-            await updateSingleItemRank(item, false);
-            // small delay to respect rate limits
-            await new Promise(r => setTimeout(r, 800));
+            await updateSingleRank(item, false);
+            // delay 700ms to respect free tier rate limits
+            await new Promise(r => setTimeout(r, 700));
         }
-        showMessage(`🏁 Refresh completed! All ranks updated.`, false);
+        showMessage(`🏁 All rankings updated successfully!`, false);
         renderTable();
     }
 
-    // Add new domain+keyword
+    // Add new domain+keyword and trigger immediate fetch
     async function addNewTracker() {
         let domain = domainInput.value.trim();
         let keyword = keywordInput.value.trim();
         let country = countrySelect.value;
-
-        if(!domain) {
-            showMessage('Please enter a domain (example.com)', true);
-            return;
-        }
-        if(!keyword) {
-            showMessage('Please enter a keyword', true);
-            return;
-        }
-        // clean domain
+        if(!domain) { showMessage('Please enter a domain (example.com)', true); return; }
+        if(!keyword) { showMessage('Please enter a keyword', true); return; }
         domain = domain.replace(/^https?:\/\//i, '').replace(/^www\./i, '').split('/')[0];
-        if(domain === '') {
-            showMessage('Invalid domain', true);
-            return;
-        }
-        // check duplicate: same domain+keyword+country
+        if(domain === '') { showMessage('Invalid domain', true); return; }
+
         const exists = trackedItems.some(it => it.domain === domain && it.keyword.toLowerCase() === keyword.toLowerCase() && it.country === country);
-        if(exists) {
-            showMessage('This domain & keyword combination already tracked', true);
-            return;
-        }
+        if(exists) { showMessage('This domain+keyword+country combination already exists', true); return; }
 
         const newId = Date.now() + Math.floor(Math.random() * 10000);
         const newItem = {
@@ -612,20 +559,19 @@
         trackedItems.push(newItem);
         persistItems();
         renderTable();
-        // Immediately fetch live rank for this new item (optional but great UX)
-        if(serpApiKey) {
-            showMessage(`🕵️ Fetching live rank for "${keyword}" on ${domain} ...`, false);
-            await updateSingleItemRank(newItem, true);
+        // Immediately try to fetch if api key present
+        if(serpApiKey && serpApiKey.trim() !== '') {
+            showMessage(`🔍 Fetching live rank for "${keyword}" on ${domain} ...`, false);
+            await updateSingleRank(newItem, true);
         } else {
-            showMessage(`⚠️ SerpAPI key missing. Add key to fetch live ranking.`, true);
+            showMessage(`⚠️ SerpAPI key not set. Please add your key to enable live ranking.`, true);
         }
-        // Clear inputs but keep domain as placeholder maybe
         keywordInput.value = '';
-        domainInput.value = domain; // keep domain
         keywordInput.focus();
+        // keep domain for convenience
+        domainInput.value = domain;
     }
 
-    // Save SerpAPI key
     function saveApiKey() {
         let key = apiKeyInput.value.trim();
         if(key === '') {
@@ -634,46 +580,49 @@
         }
         serpApiKey = key;
         localStorage.setItem('serp_api_key', key);
-        showMessage('SerpAPI key saved successfully! 🔑', false);
-        // Optional: re-render or re-check if any pending items
+        updateApiStatusBadge();
+        showMessage('🔐 SerpAPI key saved successfully!', false);
+        // optional: prompt user to refresh existing items
         if(trackedItems.length > 0) {
-            showMessage('You can now click refresh all or add new keywords', false);
+            showMessage('You can now click refresh icon to get live rankings.', false);
         }
     }
 
-    // Initial load and if we have API key we auto refresh first 3? but not to spam. but for first-time, user can manually refresh.
-    function autoRefreshAfterLoad() {
-        if(trackedItems.length > 0 && serpApiKey) {
-            // just notify that refresh is needed, but we don't auto-consume without permission
-            showMessage(`✨ ${trackedItems.length} keywords ready. Click "refresh" icon to fetch latest live SERP.`, false);
+    // load initial + demo if empty
+    function initDemoIfEmpty() {
+        if(trackedItems.length === 0 && !localStorage.getItem('rankpulse_tracked')) {
+            const demos = [
+                { id: 10001, domain: "wikipedia.org", keyword: "machine learning", country: "us", lastRank: null, lastChecked: null },
+                { id: 10002, domain: "github.com", keyword: "open source", country: "us", lastRank: null, lastChecked: null },
+                { id: 10003, domain: "amazon.com", keyword: "best coffee", country: "us", lastRank: null, lastChecked: null }
+            ];
+            trackedItems = demos;
+            persistItems();
+            renderTable();
+            showMessage('🌟 Demo keywords added. Save your SerpAPI key and click refresh to see live positions!', false);
+        } else {
+            renderTable();
         }
     }
 
-    // Event binding
+    // event binding
     addBtn.addEventListener('click', addNewTracker);
     saveApiBtn.addEventListener('click', saveApiKey);
     refreshAllBtn.addEventListener('click', () => refreshAllItems());
-    
-    // Initialize
+
+    // initialize
     loadFromStorage();
-    autoRefreshAfterLoad();
-    // if api key present in local but not in variable
-    if(serpApiKey && apiKeyInput) apiKeyInput.value = serpApiKey;
-    // also show some demo info
-    if(trackedItems.length===0) {
-        // Preload example to demonstrate (optional, but let's add two demos if empty for showing)
-        if(!localStorage.getItem('rankpulse_tracked')) {
-            const demoItems = [
-                { id: 1001, domain: "wikipedia.org", keyword: "machine learning", country: "us", lastRank: null, lastChecked: null },
-                { id: 1002, domain: "github.com", keyword: "python code", country: "us", lastRank: null, lastChecked: null }
-            ];
-            trackedItems = demoItems;
-            persistItems();
-            renderTable();
-            showMessage('🌟 Demo keywords added. Enter your SerpAPI key and click refresh to see live positions.', false);
-        }
+    initDemoIfEmpty();
+    // if api key pre-filled in input
+    if(serpApiKey) apiKeyInput.value = serpApiKey;
+    updateApiStatusBadge();
+    // helpful additional: display current api status
+    if(serpApiKey && trackedItems.length > 0) {
+        // do not auto-refresh aggressively, but user sees refresh button
+        setTimeout(() => {
+            showMessage(`💡 Click the refresh icon (⟳) to fetch live SERP positions`, false);
+        }, 800);
     }
-    renderTable();
 </script>
 </body>
 </html>
