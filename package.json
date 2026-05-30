@@ -1,0 +1,8 @@
+{
+  "name": "rankpulse-vercel",
+  "version": "1.0.0",
+  "description": "Live SERP Keyword Tracker on Vercel",
+  "dependencies": {
+    "axios": "^1.6.0"
+  }
+}
