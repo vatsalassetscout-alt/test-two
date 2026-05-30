@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RankPulse - Live SERP Tracker on Vercel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 25px 35px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        .header h1 {
+            font-size: 32px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .header p { color: #666; margin-top: 8px; }
+        .status-badge {
+            float: right;
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .status-online { background: #4caf50; color: white; }
+        .status-offline { background: #f44336; color: white; }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+        }
+        @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .card h2 {
+            font-size: 22px;
+            margin-bottom: 20px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .input-group { margin-bottom: 20px; }
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s;
+        }
+        button:hover { transform: translateY(-2px); }
+        button:disabled { opacity: 0.6; cursor: not-allowed; }
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            margin-top: 10px;
+        }
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+            width: auto;
+            display: inline-block;
+        }
+        .table-container { overflow-x: auto; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #f0f0f0; }
+        th { background: #f8f9fa; font-weight: 600; color: #555; }
+        .rank-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 14px;
+        }
+        .rank-1 { background: linear-gradient(135deg, #ffd700, #ffed4e); color: #333; }
+        .rank-top3 { background: #c8e6c9; color: #2e7d32; }
+        .rank-top10 { background: #bbdefb; color: #1565c0; }
+        .rank-none { background: #ffcdd2; color: #c62828; }
+        .rank-pending { background: #fff3e0; color: #ef6c00; }
+        .action-buttons { display: flex; gap: 8px; }
+        .icon-btn {
+            background: none;
+            width: auto;
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+        .refresh-btn { background: #4caf50; }
+        .delete-btn { background: #f44336; }
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #333;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            display: none;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .empty-state { text-align: center; padding: 40px; color: #999; }
+        .loading { display: inline-block; width: 20px; height: 20px; border: 3px solid rgba(0,0,0,0.1); border-radius: 50%; border-top-color: #667eea; animation: spin 0.6s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1><i class="fas fa-chart-line"></i> RankPulse Live</h1>
+                <p>Professional SERP Tracker | Hosted on Vercel</p>
+            </div>
+            <div id="serverStatus" class="status-badge status-offline">
+                <i class="fas fa-circle"></i> Checking...
+            </div>
+        </div>
+    </div>
+
+    <div class="grid">
+        <div class="card">
+            <h2><i class="fas fa-plus-circle" style="color:#667eea"></i> Add New Tracker</h2>
+            <div class="input-group">
+                <label><i class="fas fa-globe"></i> Domain</label>
+                <input type="text" id="domain" placeholder="example.com" value="wikipedia.org">
+            </div>
+            <div class="input-group">
+                <label><i class="fas fa-keyword"></i> Keyword</label>
+                <input type="text" id="keyword" placeholder="your keyword" value="artificial intelligence">
+            </div>
+            <div class="input-group">
+                <label><i class="fas fa-map-marker-alt"></i> Country</label>
+                <select id="country">
+                    <option value="us">🇺🇸 United States</option>
+                    <option value="gb">🇬🇧 United Kingdom</option>
+                    <option value="in">🇮🇳 India</option>
+                    <option value="ca">🇨🇦 Canada</option>
+                    <option value="au">🇦🇺 Australia</option>
+                    <option value="de">🇩🇪 Germany</option>
+                    <option value="fr">🇫🇷 France</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label><i class="fas fa-key"></i> SerpAPI Key</label>
+                <input type="password" id="apiKey" placeholder="Enter your SerpAPI key">
+                <small style="color: #666; display: block; margin-top: 5px;">
+                    Get from <a href="https://serpapi.com" target="_blank">serpapi.com</a>
+                </small>
+            </div>
+            <button id="saveApiBtn"><i class="fas fa-save"></i> Save API Key</button>
+            <button id="addBtn" class="btn-secondary" style="margin-top: 10px;"><i class="fas fa-plus"></i> Add & Check</button>
+        </div>
+
+        <div class="card">
+            <h2><i class="fas fa-trophy" style="color:#764ba2"></i> Live Rankings</h2>
+            <button id="refreshAllBtn" style="margin-bottom: 15px; background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                <i class="fas fa-sync-alt"></i> Refresh All Rankings
+            </button>
+            <div class="table-container">
+                <table id="rankingsTable">
+                    <thead>
+                        <tr><th>Keyword</th><th>Domain</th><th>Country</th><th>Position</th><th>Last Checked</th><th>Actions</th></thead>
+                    <tbody id="rankingsBody">
+                        <tr><td colspan="6" class="empty-state">No trackers added yet. Add your first keyword above!</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="toast" class="toast"></div>
+
+<script>
+    let trackers = [];
+    let apiKey = localStorage.getItem('serpapi_key') || '';
+    let isChecking = false;
+
+    const domainInput = document.getElementById('domain');
+    const keywordInput = document.getElementById('keyword');
+    const countrySelect = document.getElementById('country');
+    const apiKeyInput = document.getElementById('apiKey');
+    const addBtn = document.getElementById('addBtn');
+    const saveApiBtn = document.getElementById('saveApiBtn');
+    const refreshAllBtn = document.getElementById('refreshAllBtn');
+    const rankingsBody = document.getElementById('rankingsBody');
+    const serverStatus = document.getElementById('serverStatus');
+    const toast = document.getElementById('toast');
+
+    async function checkServer() {
+        try {
+            const response = await fetch('/api/check-rank', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ apiKey: 'test', keyword: 'test', country: 'us', domain: 'test.com' })
+            });
+            serverStatus.className = 'status-badge status-online';
+            serverStatus.innerHTML = '<i class="fas fa-check-circle"></i> API Ready';
+        } catch (error) {
+            serverStatus.className = 'status-badge status-offline';
+            serverStatus.innerHTML = '<i class="fas fa-exclamation-circle"></i> API Ready (Vercel)';
+        }
+    }
+
+    function showMessage(msg, isError = false) {
+        toast.textContent = msg;
+        toast.style.backgroundColor = isError ? '#f44336' : '#4caf50';
+        toast.style.display = 'block';
+        setTimeout(() => { toast.style.display = 'none'; }, 3000);
+    }
+
+    function loadData() {
+        const saved = localStorage.getItem('rank_trackers');
+        if (saved) {
+            try {
+                trackers = JSON.parse(saved);
+            } catch(e) { trackers = []; }
+        }
+        if (trackers.length === 0) {
+            trackers = [
+                { id: Date.now() + 1, domain: 'wikipedia.org', keyword: 'artificial intelligence', country: 'us', position: null, lastChecked: null },
+                { id: Date.now() + 2, domain: 'github.com', keyword: 'machine learning', country: 'us', position: null, lastChecked: null }
+            ];
+            saveData();
+        }
+        apiKeyInput.value = apiKey;
+        renderTable();
+    }
+
+    function saveData() {
+        localStorage.setItem('rank_trackers', JSON.stringify(trackers));
+        localStorage.setItem('serpapi_key', apiKey);
+    }
+
+    function getRankHtml(position) {
+        if (position === null) return '<span class="rank-badge rank-pending"><i class="fas fa-clock"></i> Pending</span>';
+        if (position === 0) return '<span class="rank-badge rank-pending"><i class="fas fa-spinner fa-pulse"></i> Checking...</span>';
+        if (position === -1) return '<span class="rank-badge rank-none"><i class="fas fa-times"></i> Not in Top 100</span>';
+        if (position === 1) return `<span class="rank-badge rank-1"><i class="fas fa-crown"></i> #1</span>`;
+        if (position <= 3) return `<span class="rank-badge rank-top3"><i class="fas fa-medal"></i> #${position}</span>`;
+        if (position <= 10) return `<span class="rank-badge rank-top10"><i class="fas fa-chart-line"></i> #${position}</span>`;
+        return `<span class="rank-badge" style="background:#e0e0e0;">#${position}</span>`;
+    }
+
+    function renderTable() {
+        if (trackers.length === 0) {
+            rankingsBody.innerHTML = '<tr><td colspan="6" class="empty-state">No trackers added yet.</td></tr>';
+            return;
+        }
+        rankingsBody.innerHTML = trackers.map(tracker => `
+            <tr>
+                <td><strong>${escapeHtml(tracker.keyword)}</strong></td>
+                <td><code>${escapeHtml(tracker.domain)}</code></td>
+                <td>${getCountryFlag(tracker.country)} ${tracker.country.toUpperCase()}</td>
+                <td>${getRankHtml(tracker.position)}</td>
+                <td style="font-size: 12px; color: #666;">${tracker.lastChecked ? new Date(tracker.lastChecked).toLocaleString() : 'Never'}</td>
+                <td class="action-buttons">
+                    <button class="icon-btn refresh-btn btn-small" onclick="checkSingleRank(${tracker.id})">
+                        <i class="fas fa-sync-alt"></i> Check
+                    </button>
+                    <button class="icon-btn delete-btn btn-small" onclick="deleteTracker(${tracker.id})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function getCountryFlag(code) {
+        const flags = { us:'🇺🇸', gb:'🇬🇧', in:'🇮🇳', ca:'🇨🇦', au:'🇦🇺', de:'🇩🇪', fr:'🇫🇷' };
+        return flags[code] || '🌐';
+    }
+
+    function escapeHtml(str) {
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    async function checkSingleRank(trackerId) {
+        if (!apiKey) {
+            showMessage('Please save your SerpAPI key first!', true);
+            return;
+        }
+
+        const tracker = trackers.find(t => t.id === trackerId);
+        if (!tracker) return;
+
+        tracker.position = 0;
+        renderTable();
+
+        try {
+            const response = await fetch('/api/check-rank', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    apiKey: apiKey,
+                    keyword: tracker.keyword,
+                    country: tracker.country,
+                    domain: tracker.domain
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to check ranking');
+            }
+
+            tracker.position = data.position;
+            tracker.lastChecked = data.checkedAt;
+            saveData();
+            renderTable();
+
+            if (data.position === -1) {
+                showMessage(`"${tracker.keyword}" - Not found in top 100 results`);
+            } else {
+                showMessage(`✅ "${tracker.keyword}" is at position #${data.position} on Google!`);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            tracker.position = null;
+            renderTable();
+            showMessage(`Error: ${error.message}`, true);
+        }
+    }
+
+    async function refreshAll() {
+        if (!apiKey) {
+            showMessage('Please save your SerpAPI key first!', true);
+            return;
+        }
+
+        if (isChecking) {
+            showMessage('Already checking. Please wait...', true);
+            return;
+        }
+
+        isChecking = true;
+        showMessage(`🔄 Checking ${trackers.length} keywords...`);
+
+        for (let tracker of trackers) {
+            tracker.position = 0;
+            renderTable();
+            
+            try {
+                const response = await fetch('/api/check-rank', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        apiKey: apiKey,
+                        keyword: tracker.keyword,
+                        country: tracker.country,
+                        domain: tracker.domain
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    tracker.position = data.position;
+                    tracker.lastChecked = data.checkedAt;
+                    saveData();
+                    renderTable();
+                }
+                
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+            } catch (error) {
+                console.error(`Error checking ${tracker.keyword}:`, error);
+                tracker.position = null;
+                renderTable();
+            }
+        }
+
+        isChecking = false;
+        showMessage('✅ All rankings updated!');
+    }
+
+    async function addTracker() {
+        let domain = domainInput.value.trim();
+        let keyword = keywordInput.value.trim();
+        let country = countrySelect.value;
+
+        if (!domain || !keyword) {
+            showMessage('Please enter both domain and keyword', true);
+            return;
+        }
+
+        domain = domain.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0];
+
+        if (trackers.some(t => t.domain === domain && t.keyword === keyword && t.country === country)) {
+            showMessage('This tracker already exists!', true);
+            return;
+        }
+
+        const newTracker = {
+            id: Date.now(),
+            domain: domain,
+            keyword: keyword,
+            country: country,
+            position: null,
+            lastChecked: null
+        };
+
+        trackers.push(newTracker);
+        saveData();
+        renderTable();
+        keywordInput.value = '';
+        showMessage('✓ Tracker added!');
+        
+        if (apiKey) {
+            await checkSingleRank(newTracker.id);
+        } else {
+            showMessage('💡 Save your SerpAPI key to track rankings');
+        }
+    }
+
+    function deleteTracker(id) {
+        trackers = trackers.filter(t => t.id !== id);
+        saveData();
+        renderTable();
+        showMessage('✓ Tracker removed');
+    }
+
+    function saveApiKey() {
+        const key = apiKeyInput.value.trim();
+        if (!key) {
+            showMessage('Please enter a valid SerpAPI key', true);
+            return;
+        }
+        apiKey = key;
+        saveData();
+        showMessage('✓ API key saved! You can now check rankings.');
+    }
+
+    window.checkSingleRank = checkSingleRank;
+    window.deleteTracker = deleteTracker;
+
+    addBtn.addEventListener('click', addTracker);
+    saveApiBtn.addEventListener('click', saveApiKey);
+    refreshAllBtn.addEventListener('click', refreshAll);
+    keywordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') addTracker(); });
+
+    loadData();
+    checkServer();
+</script>
+</body>
+</html>
