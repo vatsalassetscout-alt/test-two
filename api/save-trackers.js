@@ -59,3 +59,20 @@ module.exports = async (req, res) => {
     return res.status(500).json({ error: err.message });
   }
 };
+
+// In save-trackers.js, add:
+module.exports = async (req, res) => {
+  console.log('Save endpoint called');
+  console.log('Body received:', JSON.stringify(req.body));
+  
+  try {
+    console.log('Environment check:', {
+      hasEmail: !!process.env.GOOGLE_CLIENT_EMAIL,
+      hasKey: !!process.env.GOOGLE_PRIVATE_KEY,
+      hasSheetId: !!process.env.GOOGLE_SHEET_ID
+    });
+    // ... rest of your code
+  } catch(err) {
+    console.error('Detailed error:', err);
+  }
+}
