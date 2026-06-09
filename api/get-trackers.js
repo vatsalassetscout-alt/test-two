@@ -9,8 +9,13 @@ module.exports = async (req, res) => {
 
   try {
     const clientEmail  = process.env.GOOGLE_CLIENT_EMAIL;
-    const privateKey   = (process.env.GOOGLE_PRIVATE_KEY || '').replace(/\\n/g, '\n');
+    const privateKey   = process.env.GOOGLE_PRIVATE_KEY;
     const spreadsheetId = process.env.GOOGLE_SHEET_ID;
+    console.log('EMAIL:', clientEmail);
+console.log('SHEET ID:', spreadsheetId);
+console.log('KEY EXISTS:', !!privateKey);
+console.log('KEY LENGTH:', privateKey ? privateKey.length : 0);
+console.log('KEY START:', privateKey ? privateKey.substring(0, 30) : 'NONE');
 
     if (!clientEmail)   return res.status(500).json({ error: 'GOOGLE_CLIENT_EMAIL env var not set' });
     if (!privateKey)    return res.status(500).json({ error: 'GOOGLE_PRIVATE_KEY env var not set' });
