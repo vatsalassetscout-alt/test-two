@@ -1,8 +1,0 @@
-{
-  "name": "rankpulse",
-  "version": "1.0.0",
-  "dependencies": {
-    "axios": "^1.6.0",
-    "googleapis": "^144.0.0"
-  }
-}
