@@ -40,7 +40,7 @@ console.log('KEY START:', privateKey ? privateKey.substring(0, 30) : 'NONE');
         id:      r[0] || '',
         domain:  r[1] || '',
         keyword: r[2] || '',
-        country: r[3] || 'us',
+        country: r[3] || 'in',
         pos:     r[4] === '' || r[4] == null ? null : Number(r[4]),
         checked: r[5] || null,
       }));
