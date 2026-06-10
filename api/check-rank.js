@@ -9,7 +9,7 @@ module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') { res.status(200).end(); return; }
   if (req.method !== 'POST')    { return res.status(405).json({ error: 'Method not allowed' }); }
 
-  const { apiKey, keyword, country = 'us', domain } = req.body || {};
+  const { apiKey, keyword, country = 'in', domain } = req.body || {};
 
   if (!apiKey || !keyword || !domain) {
     return res.status(400).json({
@@ -23,36 +23,71 @@ module.exports = async (req, res) => {
     .replace(/^www\./, '')
     .split('/')[0];
 
+  let position = -1;
+  let totalResultsCounted = 0;
+  let totalResults = null;
+  
+  // Define how many pages you want to check deep (e.g., 3 pages = top ~30 positions)
+  const MAX_PAGES = 3; 
+
   try {
-    const response = await axios.get('https://serpapi.com/search.json', {
-      params: { q: keyword, gl: country, hl: 'en', num: 100, api_key: apiKey },
-      timeout: 25000,
-      headers: { Accept: 'application/json', 'User-Agent': 'RankPulse/1.0' },
-    });
+    // Loop through search pages sequentially using the 'start' parameter
+    for (let page = 0; page < MAX_PAGES; page++) {
+      const startOffset = page * 10; // Page 0 = start 0, Page 1 = start 10, Page 2 = start 20
 
-    const data = response.data;
+      const response = await axios.get('https://serpapi.com/search.json', {
+        params: { 
+          q: keyword, 
+          gl: country, 
+          hl: 'en', 
+          start: startOffset, // Changed from num: 100 to dynamic pagination offset
+          api_key: apiKey 
+        },
+        timeout: 8000, // Reduced single request timeout to allow room for multiple page checks
+        headers: { Accept: 'application/json', 'User-Agent': 'RankPulse/1.0' },
+      });
 
-    if (data.error) {
-      return res.status(400).json({ error: data.error });
-    }
+      const data = response.data;
 
-    let position = -1;
-    if (Array.isArray(data.organic_results)) {
-      for (let i = 0; i < data.organic_results.length; i++) {
-        const link = data.organic_results[i].link || '';
-        const rd = link.toLowerCase()
-          .replace(/^https?:\/\//, '')
-          .replace(/^www\./, '')
-          .split('/')[0];
-        if (
-          rd === cleanDomain ||
-          rd === `www.${cleanDomain}` ||
-          cleanDomain === `www.${rd}` ||
-          rd.endsWith(`.${cleanDomain}`)
-        ) {
-          position = i + 1;
-          break;
+      if (data.error) {
+        return res.status(400).json({ error: data.error });
+      }
+
+      // Capture the global total results metadata on the first run
+      if (page === 0) {
+        totalResults = data.search_information?.total_results ?? null;
+      }
+
+      if (Array.isArray(data.organic_results) && data.organic_results.length > 0) {
+        let domainFound = false;
+
+        for (let i = 0; i < data.organic_results.length; i++) {
+          const link = data.organic_results[i].link || '';
+          const rd = link.toLowerCase()
+            .replace(/^https?:\/\//, '')
+            .replace(/^www\./, '')
+            .split('/')[0];
+            
+          if (
+            rd === cleanDomain ||
+            rd === `www.${cleanDomain}` ||
+            cleanDomain === `www.${rd}` ||
+            rd.endsWith(`.${cleanDomain}`)
+          ) {
+            // Calculate absolute position across pages using SerpApi's exact position tracker
+            position = data.organic_results[i].position || (startOffset + i + 1);
+            domainFound = true;
+            break;
+          }
         }
+
+        if (domainFound) break; // Break out of the page loop if domain is found
+
+        // Keep track of total items scanned across loops
+        totalResultsCounted += data.organic_results.length;
+      } else {
+        // Break out of the loop if Google runs out of search results early
+        break; 
       }
     }
 
@@ -62,7 +97,7 @@ module.exports = async (req, res) => {
       keyword,
       domain: cleanDomain,
       country,
-      totalResults: data.search_information?.total_results ?? null,
+      totalResults: totalResults,
       checkedAt: new Date().toISOString(),
     });
 
