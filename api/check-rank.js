@@ -28,7 +28,7 @@ module.exports = async (req, res) => {
   let totalResults = null;
   
   // Define how many pages you want to check deep (e.g., 3 pages = top ~30 positions)
-  const MAX_PAGES = 3; 
+  const MAX_PAGES = 10; 
 
   try {
     // Loop through search pages sequentially using the 'start' parameter
