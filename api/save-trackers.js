@@ -8,6 +8,8 @@ module.exports = async (req, res) => {
   if (req.method !== 'POST') { return res.status(405).json({ error: 'Method not allowed' }); }
 
   try {
+      console.log('SAVE API HIT');
+    console.log('BODY:', JSON.stringify(req.body));
     const trackers = req.body;
     if (!Array.isArray(trackers)) {
       return res.status(400).json({ error: 'Body must be an array of trackers' });
@@ -27,13 +29,13 @@ module.exports = async (req, res) => {
     });
 
     const sheets = google.sheets({ version: 'v4', auth });
-
+    console.log('BEFORE CLEAR');
     // Clear existing data rows (keep header row 1)
     await sheets.spreadsheets.values.clear({
       spreadsheetId,
       range: 'Sheet1!A2:F',
     });
-
+console.log('AFTER CLEAR');
     if (trackers.length > 0) {
       const values = trackers.map(t => [
         t.id      || '',
@@ -43,15 +45,17 @@ module.exports = async (req, res) => {
         (t.pos === 0 || t.pos === null || t.pos === undefined) ? '' : String(t.pos),
         t.checked || '',
       ]);
-
+      console.log('BEFORE UPDATE');
       await sheets.spreadsheets.values.update({
         spreadsheetId,
         range: 'Sheet1!A2',
         valueInputOption: 'RAW',
         requestBody: { values },
       });
-    }
+      
+      console.log('AFTER UPDATE');
 
+    }
     return res.status(200).json({ success: true, saved: trackers.length });
 
   } catch (err) {
@@ -59,20 +63,3 @@ module.exports = async (req, res) => {
     return res.status(500).json({ error: err.message });
   }
 };
-
-// In save-trackers.js, add:
-module.exports = async (req, res) => {
-  console.log('Save endpoint called');
-  console.log('Body received:', JSON.stringify(req.body));
-  
-  try {
-    console.log('Environment check:', {
-      hasEmail: !!process.env.GOOGLE_CLIENT_EMAIL,
-      hasKey: !!process.env.GOOGLE_PRIVATE_KEY,
-      hasSheetId: !!process.env.GOOGLE_SHEET_ID
-    });
-    // ... rest of your code
-  } catch(err) {
-    console.error('Detailed error:', err);
-  }
-}
