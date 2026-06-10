@@ -39,7 +39,7 @@ module.exports = async (req, res) => {
         t.id      || '',
         t.domain  || '',
         t.keyword || '',
-        t.country || 'us',
+        t.country || 'in',
         (t.pos === 0 || t.pos === null || t.pos === undefined) ? '' : String(t.pos),
         t.checked || '',
       ]);
