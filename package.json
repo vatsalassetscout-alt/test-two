@@ -1,9 +1,0 @@
-{
-  "name": "rankpulse",
-  "version": "1.0.0",
-  "description": "Live SERP Rank Tracker",
-  "dependencies": {
-    "axios": "^1.6.0",
-    "googleapis": "^140.0.0"
-  }
-}
