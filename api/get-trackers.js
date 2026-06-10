@@ -9,7 +9,7 @@ module.exports = async (req, res) => {
 
   try {
     const clientEmail  = process.env.GOOGLE_CLIENT_EMAIL;
-    const privateKey   = process.env.GOOGLE_PRIVATE_KEY;
+    const privateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n').trim();    
     const spreadsheetId = process.env.GOOGLE_SHEET_ID;
     console.log('EMAIL:', clientEmail);
 console.log('SHEET ID:', spreadsheetId);
